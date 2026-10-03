@@ -1,0 +1,24 @@
+services:
+  mail-alias-router:
+    build: .
+    image: mail-alias-router:1.0.0
+    container_name: mail-alias-router
+    ports:
+      - "8080:8080"
+    environment:
+      ROUTER_DB_PATH: /data/router.db
+      ROUTER_HOST: 0.0.0.0
+      ROUTER_PORT: "8080"
+      ROUTER_MAX_HOPS: "100"
+    volumes:
+      - router-data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8080/healthz', timeout=3).status==200 else 1)"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 3s
+
+volumes:
+  router-data:
